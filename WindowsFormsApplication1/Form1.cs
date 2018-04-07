@@ -44,23 +44,7 @@ namespace WindowsFormsApplication1
         
 
         private void toolStripButton1_Click(object sender, EventArgs e)
-        {
-            
-            /*
-            for (int x = 0; x < 100; x++)
-            {
-                for (int y = 0; y < 100; y++)
-                {
-                   
-                    CurrentBitmap.SetPixel(x, y, Color.FromArgb(150, 150, 150));
-                                      
-                }
-            }
-            Point newPoint = new Point(50, 50);
-            Graphics newImage = this.CreateGraphics();
-            newImage.DrawImage(CurrentBitmap, newPoint); 
- */
-            
+        {                     
             open.Filter = "All Supported types |*.jpg;*.jpeg;*.gif;*.bmp;*.pgm|JPEG (*.jpg;*.jpeg)|*.jpg; *.jpeg;|GIF (*.GIF)|*.gif|Bitmap files (*.bmp)|*.bmp|PGM files (*.pgm)|*.pgm";
             open.Multiselect = true;
             //open.Filter-> Филтрира се прозорецът за отваряне на файл, така че да може да се посочат	               
@@ -85,7 +69,6 @@ namespace WindowsFormsApplication1
                 catch (Exception ex)
                 {
                     // Ako файловете от кода между try i catch са повредени се извиква следниям MessageBox
-
 
                     MessageBox.Show("The image is corrupt or is not in correct format!");
                     // MessageBox.Show(ex.Data.ToString());
@@ -142,7 +125,7 @@ namespace WindowsFormsApplication1
 	            ImageWidth = int.Parse(ExtractDimension[0]);
                 finalImageWidth = ImageWidth;
 	            CurrentBitmap = new Bitmap(ImageWidth, ImageHeight);
-                CurrentBitmap2 = new Bitmap(finalImageWidth, finalImageHeight);
+                CurrentBitmap2 = new Bitmap(ImageWidth, ImageHeight);
                 FinalBitmap = new Bitmap(finalImageWidth, finalImageHeight);
                 
 	            
@@ -179,9 +162,7 @@ namespace WindowsFormsApplication1
 	            BuildCanvas(0);
             else if (fileNumber == 1)    
                 BuildCanvas(1);
-	        }
-
-  
+	        }  
         
         public void BuildCanvas(int fileNumber)
 	        {
@@ -245,6 +226,8 @@ namespace WindowsFormsApplication1
                                 CurrentX += 1;
                                 Counter += 1;
                             } while (Counter <= ColorArrayFilteredTemp.Count);
+
+                            // Save each image data in separate string
                             if (fileNumber == 0) {
                                 CurrentBitmap = CurrentBitmapTemp;
                             }
@@ -263,25 +246,8 @@ namespace WindowsFormsApplication1
                             Graphics newImage2 = this.CreateGraphics();
                             newImage2.DrawImage(CurrentBitmap2, newPoint2);
 
-                            // Draw final image
-                            BuildFinalImage();
-                            Point newPoint3 = new Point(50, 120);
-                            Graphics newImage3 = this.CreateGraphics();
-                            newImage3.DrawImage(FinalBitmap, newPoint3);
-                        
-                       
-
-                        // Draw second image
-                        //if (ColorArrayFiltered2 != null)
-                        //{
-                        //    MessageBox.Show("Draw second image");
-                        //    Point newPoint2 = new Point(250, 50);
-                        //    Graphics newImage2 = this.CreateGraphics();
-                        //    newImage2.DrawImage(CurrentBitmap2, newPoint2);
-                        //}
-
-                        //hasImage = true;
-                    
+                            // Draw final image;
+                            BuildFinalImage(1);                                                                                                   
                   
 	            }
 	            catch (Exception e)
@@ -293,10 +259,17 @@ namespace WindowsFormsApplication1
             
 	        }
 
-        public void BuildFinalImage() {
-            
-            int Counter = 0;
-          
+        public void BuildFinalImage(int fileNumber) {
+
+            //MessageBox.Show(FinalBitmap.Width.ToString());
+
+            if (fileNumber == 1)
+            {
+                int Counter = 0;
+                CurrentY = 0;
+                CurrentX = 0;
+                int r, g, b; 
+
                 do
                 {
                     if (CurrentX == FinalBitmap.Width)
@@ -312,22 +285,23 @@ namespace WindowsFormsApplication1
                     //За RGB се поставя една и съща стойност за да стане сив цвят
 
                     // Average of the two images
-                    int r = (int.Parse(ColorArrayFiltered[Counter].ToString()) + int.Parse(ColorArrayFiltered2[Counter].ToString())) / 2;
-                    int g = (int.Parse(ColorArrayFiltered[Counter].ToString()) + int.Parse(ColorArrayFiltered2[Counter].ToString())) / 2; ;
-                    int b = (int.Parse(ColorArrayFiltered[Counter].ToString()) + int.Parse(ColorArrayFiltered2[Counter].ToString())) / 2; ;
-         
-                    FinalBitmap.SetPixel(CurrentX, CurrentY, Color.FromArgb(255, 100, 150, 255));
+                    r = (int.Parse(ColorArrayFiltered[Counter].ToString()) + int.Parse(ColorArrayFiltered2[Counter].ToString())) / 2;
+                    g = (int.Parse(ColorArrayFiltered[Counter].ToString()) + int.Parse(ColorArrayFiltered2[Counter].ToString())) / 2; ;
+                    b = (int.Parse(ColorArrayFiltered[Counter].ToString()) + int.Parse(ColorArrayFiltered2[Counter].ToString())) / 2; ;
+
+                    FinalBitmap.SetPixel(CurrentX, CurrentY, Color.FromArgb(255, r, g, b));
                     CurrentX += 1;
                     Counter += 1;
-                } while (Counter <= ColorArrayFiltered.Count);              
-            
+                } while (Counter <= ColorArrayFiltered.Count);
+                               
+  
+                Point newPoint3 = new Point(450, 50);
+                Graphics newImage3 = this.CreateGraphics();
+                newImage3.DrawImage(FinalBitmap, newPoint3);
+            }
+
         }
         
-       /*private void Form1_Load(object sender, EventArgs e)
-	        {         
-	
-	        }*/
-	
 	    private void exitToolStripMenuItem_Click(object sender, EventArgs e)
 	        {
 	            this.Dispose();
@@ -346,40 +320,5 @@ namespace WindowsFormsApplication1
                 CurrentFilePath = "";
                 ImageType = "";
             }
-/*
-        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
-	        {
-	            if (hasImage == true)
-	            {
-	               
-	                    pictureBox2.Height = pictureBox1.Height;
-	                    pictureBox2.Width = pictureBox1.Width;
-	                    pictureBox2.Image = pictureBox1.Image;
-	                    //zoom2x = false;
-	              
-	            }
-	            else MessageBox.Show(" Open an image first!!!");
-	             
-	        }
-	
-        private void xToolStripMenuItem_Click(object sender, EventArgs e)
-	        {
-	            if (hasImage == true)
-	            {
-	               //за да може картинката да се уголемява с размерите на самия PictureBox2
-	                    pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-	                    pictureBox2.Image = pictureBox1.Image;
-	                    pictureBox2.Height = pictureBox1.Height * 2;
-	                    pictureBox2.Width = pictureBox1.Width * 2;
-	                    //zoom2x = true;
-	               
-	            }else MessageBox.Show(" Open an image first!!!");         
-}
-
-        private void Form1_Load_1(object sender, EventArgs e) {}
-        
-        private void button1_Click(object sender, EventArgs e)
-        { MessageBox.Show(" Open an image first!!!"); }
-        */
     }
 }

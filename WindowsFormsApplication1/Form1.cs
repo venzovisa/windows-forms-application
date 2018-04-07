@@ -16,13 +16,8 @@ namespace WindowsFormsApplication1
     {
         public Form1()
         {
-            InitializeComponent();
-            //pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-	        //pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;             
-        }
-       
-        PictureBox pictureBox1 = new PictureBox();
-        PictureBox pictureBox2 = new PictureBox();
+            InitializeComponent();            
+        }           
         OpenFileDialog open = new OpenFileDialog();        
         Bitmap CurrentBitmap = new Bitmap(512, 512);
         Bitmap CurrentBitmap2 = new Bitmap(512, 512);
@@ -40,12 +35,12 @@ namespace WindowsFormsApplication1
         String ImageType = "";// Типа на картинката, чете се от .pgm файл "P2"; 
         ArrayList ColorArrayFiltered = new ArrayList();
         ArrayList ColorArrayFiltered2 = new ArrayList();
-        //bool hasImage = false;
-        
+        ArrayList FinalImageData = new ArrayList();               
 
         private void toolStripButton1_Click(object sender, EventArgs e)
         {                     
-            open.Filter = "All Supported types |*.jpg;*.jpeg;*.gif;*.bmp;*.pgm|JPEG (*.jpg;*.jpeg)|*.jpg; *.jpeg;|GIF (*.GIF)|*.gif|Bitmap files (*.bmp)|*.bmp|PGM files (*.pgm)|*.pgm";
+            //open.Filter = "All Supported types |PGM files (*.pgm)|*.pgm";
+            // Open two files
             open.Multiselect = true;
             //open.Filter-> Филтрира се прозорецът за отваряне на файл, така че да може да се посочат	               
             //само определени видове формати за изображения;
@@ -70,7 +65,7 @@ namespace WindowsFormsApplication1
                 {
                     // Ako файловете от кода между try i catch са повредени се извиква следниям MessageBox
 
-                    MessageBox.Show("The image is corrupt or is not in correct format!");
+                    MessageBox.Show("File reading error!");
                     // MessageBox.Show(ex.Data.ToString());
                 }
             }
@@ -105,7 +100,7 @@ namespace WindowsFormsApplication1
 	            else 
 	            { 
 	                ImageStreamReader.Close();
-	                MessageBox.Show("The image is not the write format or is corrupt!!!");
+	                MessageBox.Show("File error!");
 	                PurgeGlobalData(); 
             	            }
 	            //Проверка за други коментари в файла и прочитане на размерите за изображението
@@ -181,9 +176,7 @@ namespace WindowsFormsApplication1
                     ArrayList ColorArrayFilteredTemp = new ArrayList();
                     Bitmap CurrentBitmapTemp = new Bitmap(512, 512);
                  
-	                String[] ColorArray = NewString.Split(' ');                                   
-                    //if (ColorArrayFiltered.Count > 0)
-                    //{                      
+	                String[] ColorArray = NewString.Split(' ');                                                                       
                         int Counter = 0;
                         int NewCounter = 0;
                         do
@@ -241,27 +234,26 @@ namespace WindowsFormsApplication1
                             Graphics newImage = this.CreateGraphics();
                             newImage.DrawImage(CurrentBitmap, newPoint);
 
-                            // Draw second image
-                            Point newPoint2 = new Point(250, 50);
-                            Graphics newImage2 = this.CreateGraphics();
-                            newImage2.DrawImage(CurrentBitmap2, newPoint2);
+                            // Triggers if there are two images opended
+                            if (fileNumber == 1) {
+                                // Draw second image
+                                Point newPoint2 = new Point(250, 50);
+                                Graphics newImage2 = this.CreateGraphics();
+                                newImage2.DrawImage(CurrentBitmap2, newPoint2);
 
-                            // Draw final image;
-                            BuildFinalImage(1);                                                                                                   
-                  
+                                // Draw final image;
+                                BuildFinalImage(1);  
+                            }                                                                                                                                          
 	            }
-	            catch (Exception e)
+	            catch (Exception)
 	            {
-	                MessageBox.Show("The image is corrupt or is not in correct format!");
-	              //  MessageBox.Show(e.GetBaseException().ToString());
+	                MessageBox.Show("Error in image view!");	             
 	                PurgeGlobalData();
 	            }	
             
 	        }
 
-        public void BuildFinalImage(int fileNumber) {
-
-            //MessageBox.Show(FinalBitmap.Width.ToString());
+        public void BuildFinalImage(int fileNumber) {         
 
             if (fileNumber == 1)
             {
@@ -289,6 +281,11 @@ namespace WindowsFormsApplication1
                     g = (int.Parse(ColorArrayFiltered[Counter].ToString()) + int.Parse(ColorArrayFiltered2[Counter].ToString())) / 2; ;
                     b = (int.Parse(ColorArrayFiltered[Counter].ToString()) + int.Parse(ColorArrayFiltered2[Counter].ToString())) / 2; ;
 
+                    // Save data to export in .PGM format
+                    FinalImageData.Add(r);
+                    FinalImageData.Add(g);
+                    FinalImageData.Add(b);
+
                     FinalBitmap.SetPixel(CurrentX, CurrentY, Color.FromArgb(255, r, g, b));
                     CurrentX += 1;
                     Counter += 1;
@@ -308,9 +305,7 @@ namespace WindowsFormsApplication1
 	        }
 
         private void PurgeGlobalData()
-            {
-                //CurrentBitmap = new Bitmap(5, 5);
-                //  DisplayPanel.Image = Nothing
+            {               
                 CurrentX = 0;
                 CurrentY = 0;
                 ImageHeight = 0;
@@ -320,5 +315,24 @@ namespace WindowsFormsApplication1
                 CurrentFilePath = "";
                 ImageType = "";
             }
+
+        private void toolStripButton2_Click(object sender, EventArgs e)
+        {              
+            int Counter = 0;                    
+            using (System.IO.StreamWriter file =
+                new System.IO.StreamWriter(@"finalimage.pgm", false))
+            {                
+                file.WriteLine("P2");
+                file.WriteLine("# Comment goes here");
+                file.WriteLine(ImageWidth + " " + ImageHeight);
+                file.WriteLine(255);
+                do
+                {                 
+                    file.Write(FinalImageData[Counter].ToString() + " ");
+                    Counter++;
+                }
+                while (Counter < FinalImageData.Count);                            
+            }
+        }
     }
 }
